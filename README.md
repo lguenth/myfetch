@@ -1,21 +1,21 @@
-# zfetch
-This is just another minimal system fetch program
+# myfetch
+This is just another minimal system fetch program, tweaked to my liking.
 
 ## Preview
 ![preview](https://raw.githubusercontent.com/WitherCubes/zfetch/master/assets/preview.png)
 
 ## Installation
 
-    # make install
+    $ make install
 
 ## Uninstallation
 
-    # make uninstall
+    $ make uninstall
 
 ## Configuration
 
-- Edit the zfetch file and reinstall by following the installation given above.
+- Edit the myfetch file and reinstall by following the installation given above.
 
 ## License
 
-Released under the [GPL-3.0 License](https://github.com/WitherCubes/zfetch/blob/master/LICENSE).
+Released under the [GPL-3.0 License](https://github.com/lguenth/myfetch/blob/master/LICENSE).
