@@ -1,0 +1,82 @@
+#!/bin/sh
+# ASCII ART https://www.asciiart.eu/computers/game-consoles
+# Packages
+
+if [ -x "$(command -v pacman)" ]; then pkg=`pacman -Q | wc -l`
+elif [ -x "$(command -v apt-get)" ]; then pkg=`dpkg --list | wc -l`
+elif [ -x "$(command -v zypper)" ]; then pkg=`zypper search -i | wc -l`
+elif [ -x "$(command -v dnf)" ]; then pkg=`dnf list | wc -l`
+elif [ -x "$(command -v emerge)" ]; then pkg=`find /var/db/pkg -mindepth 2 -type d | sed -e 's|^/var/db/pkg/||' | LC_ALL=C sort | wc -l`
+elif [ -x "$(command -v nix-channel)" ]; then pkg=`nix-store --query --requisites /run/current-system | cut -d- -f2- | sort | uniq | wc -l`
+elif [ -x "$(command -v xbps-install)" ]; then pkg=`xbps-query -l | wc -l`
+fi
+
+# Get OS
+
+os=$(grep 'PRETTY_NAME' /etc/os-release | tail -c +14 | head -c -2)
+
+# Shell and Kernel
+
+shell=${SHELL##*/}
+kernel=$(uname -r)
+
+
+# Window Manager
+
+[ ! "$wm" ] && [ "$DISPLAY" ] && command -v xprop >/dev/null && {
+  id=$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)
+  id=${id##* }
+  wm=$(xprop -id "$id" -notype -len 100 -f _NET_WM_NAME 8t |
+    grep '^_NET_WM_NAME' | cut -d\" -f 2)
+}
+
+# For non-EWH WMs
+
+[ ! "$wm" ] || [ "$wm" = "LG3D" ] &&
+  wm=$(
+    ps -e | grep -m 1 -o \
+      -e "sway" \
+      -e "kiwmi" \
+      -e "wayfire" \
+      -e "sowm" \
+      -e "catwm" \
+      -e "fvwm" \
+      -e "dwm" \
+      -e "2bwm" \
+      -e "monsterwm" \
+      -e "tinywm" \
+      -e "xmonad"
+  )
+
+# Other Commands not used (uncomment to use them)
+
+#uptime=$(uptime -p | tail -c +3)                                                               # Uptime
+#dimensions=$(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')           # Screen Dimensions
+#cpu=$(cat /proc/cpuinfo | grep 'model name' | uniq | tail -c +14)                              # CPU
+#mem=$(free --mega | sed -n -E '2s/^[^0-9]*([0-9]+) *([0-9]+).*/'"${space}"'\2 \/ \1 MB/p')     # Memory Used
+#host="$(uname -n)"                                                                             # Hostname
+#user="${USER-$(id -u -n)}"                                                                     # User
+
+# Colors
+
+c0=$(tput sgr0)    # reset
+c1=$(tput setaf 5) # magenta
+c2=$(tput setaf 2) # green
+c3=$(tput setaf 7) # white
+c4=$(tput setaf 4) # blue
+c5=$(tput setaf 1) # red
+c6=$(tput setaf 3) # yellow
+c7=$(tput setaf 6) # cyan
+c8=$(tput setaf 0) # black
+
+# Print
+
+cat << EOF
+${c3}  ________________
+${c3} |   |,"    ".|   |  ${c0}${c1}os${c0}      ${c3}   ${os} ${c0}
+${c3} |   /  SONY  \   |  ${c0}${c2}kernel${c0}  ${c3}   ${kernel} ${c0}
+${c3} |O _\   />   /_  |  ${c0}${c4}pkg${c0}     ${c3}   ${pkg} ${c0}
+${c3} |_(_)'.____.'(_)_|  ${c0}${c5}shell${c0}   ${c3}   ${shell} ${c0}
+${c3} [___|[=]__[=]|___]  ${c0}${c6}wm${c0}      ${c3}   ${wm} ${c0}
+
+EOF
